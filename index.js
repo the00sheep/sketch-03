@@ -17,14 +17,16 @@ let rgbG = 0;
 let rgbB = 0;
 let rgbalph = 0;
 
+let speed = 3;
+
 function changeRGB(r, g, b) {
-  rgnR = r;
+  rgbR = r;
   rgbG = g;
   rgbB = b;
 }
 
 function changeRGB(r, g, b, alph) {
-  rgnR = r;
+  rgbR = r;
   rgbG = g;
   rgbB = b;
   rgbalph = alph;
@@ -51,10 +53,6 @@ const sketch = ({ context, width, height }) => {
         const other = agents[j];
 
         const dist = agent.pos.getDistance(other.pos);
-
-        if (dist < 200) {
-          context.strokeStyle = 'rgb(255,0,0,0.4)';
-        }
 
         if (dist > 200) continue;
 
@@ -97,7 +95,6 @@ class Agent {
     this.pos = new Vector(x, y);
     this.vel = new Vector(random.range(-1, 1), random.range(-1, 1));
     this.radius = random.range(4, 12);
-    this.speed = 4;
   }
 
   bounce(width, height) {
@@ -110,13 +107,9 @@ class Agent {
     this.pos.y = (this.pos.y + height) % height;
   }
 
-  changeSpeed(speed) {
-    this.speed = speed;
-  }
-
   update() {
-    this.pos.x += this.vel.x * this.speed;
-    this.pos.y += this.vel.y * this.speed;
+    this.pos.x += this.vel.x * speed;
+    this.pos.y += this.vel.y * speed;
   }
 
   draw(context) {
@@ -131,8 +124,9 @@ class Agent {
     context.beginPath();
     context.arc(0, 0, this.radius, 0, Math.PI * 2);
     context.fill();
-    changeRGB(0, 0, 0, 0.4);
-    context.strokeStyle = `rgb(${rgbR},${rgbG},${rgbB})`;
+    changeRGB(100, 40, 240, 0.7);
+    context.strokeStyle = `rgb(${rgbR},${rgbG},${rgbB},${rgbalph})`;
+
     context.stroke();
 
     context.restore();
