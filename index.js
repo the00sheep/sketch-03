@@ -1,6 +1,6 @@
 const canvasSketch = require('canvas-sketch');
-const math = require('canvas-sketch-util/math');
 const random = require('canvas-sketch-util/random');
+const math = require('canvas-sketch-util/math');
 
 const settings = {
   dimensions: [1080, 1080],
@@ -8,21 +8,40 @@ const settings = {
 };
 
 const animate = () => {
+  console.log('domestika');
   requestAnimationFrame(animate);
 };
+// animate();
+let rgbR = 0;
+let rgbG = 0;
+let rgbB = 0;
+let rgbalph = 0;
+
+function changeRGB(r, g, b) {
+  rgnR = r;
+  rgbG = g;
+  rgbB = b;
+}
+
+function changeRGB(r, g, b, alph) {
+  rgnR = r;
+  rgbG = g;
+  rgbB = b;
+  rgbalph = alph;
+}
 
 const sketch = ({ context, width, height }) => {
   const agents = [];
 
-  for (let i = 0; i < 40; i++) {
-    const x = random.range(0, width);
-    const y = random.range(0, height);
+  for (let i = 0; i < 60; i++) {
+    const x = random.range(0.4 * width, 0.6 * width);
+    const y = random.range(0.4 * height, 0.6 * height);
 
     agents.push(new Agent(x, y));
   }
 
   return ({ context, width, height }) => {
-    context.fillStyle = 'white';
+    context.fillStyle = 'black';
     context.fillRect(0, 0, width, height);
 
     for (let i = 0; i < agents.length; i++) {
@@ -33,13 +52,18 @@ const sketch = ({ context, width, height }) => {
 
         const dist = agent.pos.getDistance(other.pos);
 
-        if (dist > 50) continue;
+        if (dist < 200) {
+          context.strokeStyle = 'rgb(255,0,0,0.4)';
+        }
+
+        if (dist > 200) continue;
 
         context.lineWidth = math.mapRange(dist, 0, 200, 12, 1);
 
         context.beginPath();
         context.moveTo(agent.pos.x, agent.pos.y);
         context.lineTo(other.pos.x, other.pos.y);
+        context.strokeStyle = 'rgb(0,255,200,0.4)';
         context.stroke();
       }
     }
@@ -47,7 +71,8 @@ const sketch = ({ context, width, height }) => {
     agents.forEach((agent) => {
       agent.update();
       agent.draw(context);
-      agent.bounce(width, height);
+      //agent.bounce(width, height);
+      agent.wrap(width, height);
     });
   };
 };
@@ -71,7 +96,8 @@ class Agent {
   constructor(x, y) {
     this.pos = new Vector(x, y);
     this.vel = new Vector(random.range(-1, 1), random.range(-1, 1));
-    this.radius = random.range(4, 20);
+    this.radius = random.range(4, 12);
+    this.speed = 4;
   }
 
   bounce(width, height) {
@@ -79,13 +105,25 @@ class Agent {
     if (this.pos.y <= 0 || this.pos.y >= height) this.vel.y *= -1;
   }
 
+  wrap(width, height) {
+    this.pos.x = (this.pos.x + width) % width;
+    this.pos.y = (this.pos.y + height) % height;
+  }
+
+  changeSpeed(speed) {
+    this.speed = speed;
+  }
+
   update() {
-    this.pos.x += this.vel.x;
-    this.pos.y += this.vel.y;
+    this.pos.x += this.vel.x * this.speed;
+    this.pos.y += this.vel.y * this.speed;
   }
 
   draw(context) {
     context.save();
+    changeRGB(0, 255, 255);
+    //context.fillStyle = 'rgb(0,255,255)';
+    context.fillStyle = `rgb(${rgbR},${rgbG},${rgbB})`;
     context.translate(this.pos.x, this.pos.y);
 
     context.lineWidth = 4;
@@ -93,6 +131,8 @@ class Agent {
     context.beginPath();
     context.arc(0, 0, this.radius, 0, Math.PI * 2);
     context.fill();
+    changeRGB(0, 0, 0, 0.4);
+    context.strokeStyle = `rgb(${rgbR},${rgbG},${rgbB})`;
     context.stroke();
 
     context.restore();
